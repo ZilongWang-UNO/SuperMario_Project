@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Map Editor</title>
+    <style>
+        * {
+            margin: 0;
+
+        }
+
+        canvas {
+            border: dashed black 1px;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canv" data-action="draw_tile" width="640" height="512">
+    </canvas>
+
+    <div>
+        <canvas id="0" data-action="change_active_tile" width="32" height="32" color="#5C94FC">
+        </canvas>
+        <canvas id="1" data-action="change_active_tile" width="32" height="32" color="#C84C0C">
+        </canvas>
+        <canvas id="2" data-action="change_active_tile" width="32" height="32" color="#FC9838">
+        </canvas>
+        <canvas id="3" data-action="change_active_tile" width="32" height="32" color="#FFFFFF">
+        </canvas>
+        <canvas id="4" data-action="change_active_tile" width="32" height="32" color="#80D010">
+        </canvas>
+        <canvas id="5" data-action="change_active_tile" width="32" height="32" color="#fcd8a8">
+        </canvas>
+    </div>
+
+
+
+    <script>
+
+        let movex = 0
+
+
+        let cvs = document.getElementById("0");
+        ctx = cvs.getContext("2d");
+        ctx.fillStyle = '#5C94FC';
+        ctx.fillRect(0, 0, 32, 32);
+
+        cvs = document.getElementById("1");
+        ctx = cvs.getContext("2d");
+        ctx.fillStyle = '#C84C0C';
+        ctx.fillRect(0, 0, 32, 32);
+
+        cvs = document.getElementById("2");
+        ctx = cvs.getContext("2d");
+        ctx.fillStyle = '#FC9838';
+        ctx.fillRect(0, 0, 32, 32);
+
+        cvs = document.getElementById("3");
+        ctx = cvs.getContext("2d");
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, 32, 32);
+
+        cvs = document.getElementById("4");
+        ctx = cvs.getContext("2d");
+        ctx.fillStyle = '#80D010';
+        ctx.fillRect(0, 0, 32, 32);
+
+        cvs = document.getElementById("5");
+        ctx = cvs.getContext("2d");
+        ctx.fillStyle = '#fcd8a8';
+        ctx.fillRect(0, 0, 32, 32);
+
+
+
+        //砖块C84C0C   蓝天  5080FF   白云  FFFFFF  管道  80D010  问号  FC9838  小怪fcd8a8
+
+
+
+        const e = sel => document.querySelector(sel)
+        const log = console.log.bind(console)
+
+        //let fps = 30;
+
+        const actions = {
+            change_active_tile(event) {
+                let id = Number(event.target.id)
+                //log('avtive tile', id)
+                window.activeTile = event.target
+            },
+
+            draw_tile(event) {
+                let target = event.target
+                let rect = target.getBoundingClientRect()
+                let x = event.clientX - rect.left
+                let y = event.clientY - rect.top
+                let tileSize = 32
+                let i = Math.floor(x / tileSize)
+                let j = Math.floor(y / tileSize)
+                let x1 = i * tileSize
+                let y1 = j * tileSize
+                window.context.fillRect(x1, y1, tileSize, tileSize)
+                let color = document.getElementById(Number(window.activeTile.id)).getAttribute("color")
+                window.context.fillStyle = color;
+                window.context.fillRect(x1, y1, tileSize, tileSize);
+            },
+        }
+
+        const tilePosition = (x, y) => {
+            let tileSize = 32
+            let i = Math.floor(x / tileSize)
+            let j = Math.floor(y / tileSize)
+            let x1 = i * tileSize
+            let y1 = j * tileSize
+            return [x1, y1]
+        }
+        const drawTileAt = (x, y) => {
+            let tileSize = 32
+            let [x1, y1] = tilePosition(x, y)
+            let color = document.getElementById(Number(window.activeTile.id)).getAttribute("color")
+            window.context.fillStyle = color;
+            window.context.fillRect(x1, y1, tileSize, tileSize);
+
+            let tile = Number(window.activeTile.id)
+            let mx = x1 / tileSize
+            let my = y1 / tileSize
+            window.map.setTile(mx, my, tile)
+
+        }
+        const bindEvents = () => {
+            e('body').addEventListener('click', event => {
+                let action = event.target.dataset.action
+                actions[action] && actions[action](event)
+            })
+
+            let moving = false
+
+            window.canvas.addEventListener('mousedown', event => {
+                moving = true
+                let x = event.clientX
+                let y = event.clientY
+                drawTileAt(x, y)
+            })
+            window.canvas.addEventListener('mousemove', event => {
+                if (moving) {
+                    let x = event.clientX
+                    let y = event.clientY
+                    drawTileAt(x, y)
+                }
+            })
+            window.canvas.addEventListener('mouseup', event => {
+                moving = false
+            })
+            /*document.addEventListener("keydown", event => {
+                let key = event.keyCode;
+                //left
+                if (key == 37) {
+                    log('yes')
+                    movex += 1;
+                    window.context.fillStyle = '#5080FF'
+                    window.context.fillRect(movex, 0, 1000, 1000)
+                    //left = true;
+                }
+                //right
+                if (key == 39) {
+                    log('yes')
+                    movex -= 1;
+                    window.context.fillStyle = '#5080FF'
+                    window.context.fillRect(movex, 0, 1000, 1000)
+                    //right = true;
+                }
+            })*/
+
+            /*window.canvas.addEventListener("keyup", function (event) {
+                let key = event.keyCode;
+                if (key == 37) {
+                    left = false;
+                }
+                if (key == 39) {
+                    right = false;
+                }
+            });*/
+
+        }
+
+        const init = () => {
+            window.map = new Map()
+            window.active_tile_id = null
+            window.canvas = e('canvas')
+            window.context = window.canvas.getContext('2d')
+            window.context.fillStyle = '#5C94FC'
+            window.context.fillRect(0, 0, 1000, 1000)
+        }
+
+
+        class Map {
+            constructor() {
+                this.height = 6
+                this.width = 20
+                this.tiles = []
+                this.setupTiles()
+            }
+            setupTiles() {
+                let s = this.height * this.width
+                for (let i = 0; i < s; i++) {
+                    this.tiles[i] = 0
+                }
+            }
+
+
+            setTile(i, j, tile) {
+                let index = i * this.height + j
+                this.tiles[index] = tile
+            }
+            exportJSON() {
+                let s = JSON.stringify(this.tiles)
+                log(s)
+            }
+        }
+
+        const _main = () => {
+            init()
+            bindEvents()
+        }
+
+
+        _main()
+        //setInterval( _main(), 1000 / fps);
+
+        /*function update() {
+
+        }
+
+        function draw() {
+
+        }
+
+        function tick() {
+            update()
+            draw()
+        };
+
+        setInterval(tick, 1000 / fps);*/
+    </script>
+</body>
+
+</html>

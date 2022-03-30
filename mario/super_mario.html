@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Super Mario</title>
+    <style>
+        * {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+    <script src='mario.js'></script>
+    <script src='bullet.js'></script>
+    <script src='update.js'></script>
+    <script src='draw.js'></script>
+    <script src='map.js'></script>
+
+</head>
+
+<body>
+    <canvas id="canv" width="640" height="512">
+    </canvas>
+    <script>
+        //"use strict"
+        let canvas = document.querySelector("#canv");
+        let ctx = canvas.getContext("2d");
+        //canvas.width = window.innerWidth;
+        //canvas.height = window.innerHeight;
+        let fps = 30;
+        let mario = Mario();
+        let marioColor = mario.color;
+        //let block = Block();
+        let bullets = [];
+        //let monsters = [];
+        let map = Map();
+        let offsetX = 0
+        let offset = 0
+        //let offset = Math.abs(offsetX / map.tileSize)
+        let i = 0
+        let j = 0
+        let enemyVy = 0
+        let temp = 0
+        //let offsetVX = 0
+        //let offsetMX = 0
+        //let offsetSpeed = 0.5
+        //let scroll = false
+        //let background = BackGround();
+        let left = false;
+        let right = false;
+        let jumping = false;
+        //press 'p' to pause the game, press again to start
+        let pause = false;
+        let paused = false;
+        //let rightDown = false;
+        //let touch = false;
+        let i2 = 0;
+        let j2 = 0;
+        let enemyCount = 0
+        //let enemySpeed = 0
+        let coin = []
+        let enemies = []
+        let touchBlock = false
+        let headTouch = false
+        let onGround = false
+        //let side = false
+        //add more monsters
+        /*for (let i = 0; i < 3; i++) {
+            let monster = Monster();
+            monster.x += i * 200;
+            monsters.push(monster);
+        };*/
+
+        document.addEventListener("keydown", function (event) {
+            let key = event.keyCode;
+            //left
+            //console.log(key)
+            //console.log(rightDown, right)
+            if (key == 37) {
+                left = true;
+                right = false;
+                mario.faceLeft = true;
+                mario.faceRight = false;
+            }
+            //right
+            if (key == 39) {
+                //console.log('yes')
+                left = false;
+                right = true;
+                //rightDown = true;
+                mario.faceRight = true;
+                mario.faceLeft = false;
+            }
+            //jump
+            if (key == 32 && mario.endJump) {//&& !mario.jumping && !mario.drop) {
+                //mario.jump = true
+                mario.jumping = true
+                //mario.jumping = true;
+            }
+            //pause p
+            if (key == 80 && !paused) {
+                pause = true;
+                paused = true;
+            }
+            else if (key == 80 && paused) {
+                pause = false;
+                paused = false;
+            }
+        });
+
+        document.addEventListener("keyup", function (event) {
+            let key = event.keyCode;
+            if (key == 37) {
+                left = false;
+            }
+            if (key == 39) {
+                //rightDown = false;
+                right = false;
+            }
+            if (key == 32) {
+                mario.jumping = false;
+                //mario.endJump = false;
+            }
+            //x for fire bullet
+            if (key == 88) {
+                let bullet = Bullet();
+                bullet.fired()
+                bullets.push(bullet)
+            }
+        });
+
+        //fix caton
+        setInterval(function () {
+            if (left) {
+                mario.moveLeft()
+            }
+            else if (right) {
+                mario.moveRight()
+            }
+            if (mario.jumping) {
+                mario.moveJump()
+            }
+        }, 1000 / fps);
+
+        function tick() {
+            if (!pause) {
+                update()
+                draw()
+                /*for(let key in enemies){
+                    console.log(enemies[key])
+                }*/
+            }
+        };
+
+        setInterval(tick, 1000 / fps);
+    </script>
+</body>
+
+</html>
